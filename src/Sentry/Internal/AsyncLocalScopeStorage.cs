@@ -17,7 +17,6 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _asyncLocalScope.Value = null;
-            _newStack = null;
         }
 
         public KeyValuePair<Scope, ISentryClient>[] GetScope()
