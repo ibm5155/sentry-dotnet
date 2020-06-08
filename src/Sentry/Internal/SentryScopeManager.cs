@@ -17,17 +17,15 @@ namespace Sentry.Internal
             set => _scope.SetScope(value);
         }
 
-        private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
-
+        
         public SentryScopeManager(
             SentryOptions options,
             ISentryClient rootClient)
         {
             Debug.Assert(rootClient != null);
             _options = options;
-            NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
             _scope = _options.ScopeStorageMethod.CreateScopeStorage();
-            _scope.CreateNew(NewStack());
+            _scope.CreateNew(options, rootClient);
         }
 
         public KeyValuePair<Scope, ISentryClient> GetCurrent()

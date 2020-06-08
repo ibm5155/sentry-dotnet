@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
     internal sealed class GlobalScopeStorage : IInternalScopeStorage
     {
         private KeyValuePair<Scope, ISentryClient>[] _globalScope;
-        public void CreateNew(KeyValuePair<Scope, ISentryClient>[] emptyScope)
+        private Func<KeyValuePair<Scope, ISentryClient>[]> _newStack { get; set; }
+        public void CreateNew(SentryOptions options, ISentryClient rootClient)
         {
-            _globalScope = emptyScope;
-
+            _newStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
 
         public void Dispose()
@@ -21,7 +19,7 @@ namespace Sentry.Internal
 
         public KeyValuePair<Scope, ISentryClient>[] GetScope()
         {
-            return _globalScope;
+            return _globalScope ?? ( _globalScope = _newStack());
         }
 
         public bool IsEmpty()

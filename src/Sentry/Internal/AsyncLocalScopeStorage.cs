@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Sentry.Internal
@@ -9,19 +7,22 @@ namespace Sentry.Internal
     internal sealed class AsyncLocalScopeStorage : IInternalScopeStorage
     {
         private readonly AsyncLocal<KeyValuePair<Scope, ISentryClient>[]> _asyncLocalScope = new AsyncLocal<KeyValuePair<Scope, ISentryClient>[]>();
-        public void CreateNew(KeyValuePair<Scope, ISentryClient>[] emptyScope)
+        private Func<KeyValuePair<Scope, ISentryClient>[]> _newStack { get; set; }
+
+        public void CreateNew(SentryOptions options, ISentryClient rootClient)
         {
-            _asyncLocalScope.Value = emptyScope;
+            _newStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
 
         public void Dispose()
         {
             _asyncLocalScope.Value = null;
+            _newStack = null;
         }
 
         public KeyValuePair<Scope, ISentryClient>[] GetScope()
         {
-            return _asyncLocalScope.Value;
+            return _asyncLocalScope.Value ?? (_asyncLocalScope.Value = _newStack());
         }
 
         public bool IsEmpty()
