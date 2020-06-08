@@ -357,6 +357,8 @@ namespace Sentry
         /// </remarks>
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
 
+        public ScopeStorageMethod ScopeStorageMethod { get; set; }
+
 #if SYSTEM_WEB
         /// <summary>
         /// Max request body to be captured when a Web request exists on a ASP.NET Application.

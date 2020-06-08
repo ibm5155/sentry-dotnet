@@ -1,4 +1,5 @@
 using System;
+using Sentry;
 
 namespace Sentry.Protocol
 {
@@ -26,5 +27,7 @@ namespace Sentry.Protocol
         /// or totally dropping the breadcrumb by returning null.
         /// </remarks>
         Func<Breadcrumb, Breadcrumb> BeforeBreadcrumb { get; }
+
+        ScopeStorageMethod ScopeStorageMethod {get; }
     }
 }

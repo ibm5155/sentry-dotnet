@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 
@@ -10,12 +9,12 @@ namespace Sentry.Internal
     internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly AsyncLocal<KeyValuePair<Scope, ISentryClient>[]> _asyncLocalScope = new AsyncLocal<KeyValuePair<Scope, ISentryClient>[]>();
+        private IInternalScopeStorage _scope;
 
         internal KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
         {
-            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = NewStack());
-            set => _asyncLocalScope.Value = value;
+            get => _scope.GetScope();
+            set => _scope.SetScope(value);
         }
 
         private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
@@ -27,6 +26,8 @@ namespace Sentry.Internal
             Debug.Assert(rootClient != null);
             _options = options;
             NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
+            _scope = _options.ScopeStorageMethod.CreateScopeStorage();
+            _scope.CreateNew(NewStack());
         }
 
         public KeyValuePair<Scope, ISentryClient> GetCurrent()
@@ -143,7 +144,7 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _options?.DiagnosticLogger?.LogDebug("Disposing SentryClient.");
-            _asyncLocalScope.Value = null;
+            _scope?.Dispose();
         }
     }
 }
