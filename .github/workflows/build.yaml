@@ -15,15 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-2016]
         include:
-          - os: windows-latest
+          - os: windows-2016
             build_script: .\build.ps1
-          - os: ubuntu-latest
-            build_script: ./build.sh
-          - os: macos-latest
-            build_script: ./build.sh
-
     steps:
         - name: Checkout
           uses: actions/checkout@v2
@@ -41,15 +36,7 @@ jobs:
         - name: Setup .NET SDK (v5.0)
           uses: actions/setup-dotnet@v1.7.0
           with:
-            dotnet-version: '5.0.100-preview.8.20417.9'
+            dotnet-version: '5.0.100'
 
         - name: Run build script
           run: ${{ matrix.build_script }}
-
-        - name: Archive Artifacts
-          uses: actions/upload-artifact@v2
-          with:
-            name: ${{ github.sha }}
-            path: |
-              ${{ github.workspace }}/src/**/Release/*.snupkg
-              ${{ github.workspace }}/src/**/Release/*.nupkg
