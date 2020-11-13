@@ -20,15 +20,15 @@
 
 
 	<ItemGroup>
-	<PackageReference Include="coverlet.msbuild" Version="2.9.0" />
-	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-	<PackageReference Include="NSubstitute" Version="3.1.0" />
-	<PackageReference Include="FluentAssertions" Version="5.10.3" />
-	<PackageReference Include="xunit" Version="2.4.1" />
+		<PackageReference Include="coverlet.msbuild" Version="2.9.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+		<PackageReference Include="NSubstitute" Version="3.1.0" />
+		<PackageReference Include="FluentAssertions" Version="5.10.3" />
+		<PackageReference Include="xunit" Version="2.4.1" />
 	</ItemGroup>
 
 	<Choose>
-		<When Condition="$(DefineConstants.Contains('TESTUWP'))">
+		<When Condition="$(DefineConstants.Contains('WINDOWS_UWP'))">
 			<ItemGroup>
 				<!-- xunit.runner.visualstudio was incorrectly packed for uap on newer versions -->
 				<!-- https://github.com/xunit/visualstudio.xunit/issues/221 -->
