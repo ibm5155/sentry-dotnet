@@ -1,5 +1,8 @@
 # Changelog
 
+## vNext
+
+* Add support for UWP projects (Xbox, Windows 10/Mobile,... ) (#560) @lucas-zimerman
 ## unreleased
 
 * Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman

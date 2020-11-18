@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
@@ -20,4 +20,5 @@
   <ItemGroup Condition="$(TargetFramework) == 'net5.0'">
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.0" />
   </ItemGroup>
+
 </Project>
