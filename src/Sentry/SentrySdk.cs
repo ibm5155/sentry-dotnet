@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using ContribSentry.Interface;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
@@ -71,6 +72,8 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
+            using var _ = Xunxo.Start("SentrySdk", "Init");
+
             if (options.Dsn == null)
             {
                 var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
@@ -86,7 +89,7 @@ namespace Sentry
             else
             {
                 // Validate DSN for early exception
-                _ = Dsn.Parse(options.Dsn);
+//                _ = Dsn.Parse(options.Dsn);
             }
 
             return UseHub(new Hub(options));

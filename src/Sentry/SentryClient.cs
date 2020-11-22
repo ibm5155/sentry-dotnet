@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ContribSentry.Interface;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -47,6 +48,8 @@ namespace Sentry
             SentryOptions options,
             IBackgroundWorker? worker)
         {
+            using var _ = Xunxo.Start("SdkClient", "Ctor");
+
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
             options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init

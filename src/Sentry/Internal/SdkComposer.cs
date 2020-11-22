@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using ContribSentry.Interface;
 using Sentry.Extensibility;
 using Sentry.Internal.Http;
 
@@ -17,6 +18,8 @@ namespace Sentry.Internal
 
         private ITransport CreateTransport()
         {
+            using var _ = Xunxo.Start("SdkComposer", "CreateTransport");
+
             if (_options.SentryHttpClientFactory is { })
             {
                 _options.DiagnosticLogger?.LogDebug(
@@ -25,10 +28,11 @@ namespace Sentry.Internal
                 );
             }
 
-            var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
-            var httpClient = httpClientFactory.Create(_options);
 
-            var httpTransport = new HttpTransport(_options, httpClient);
+                var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
+                var httpClient = httpClientFactory.Create(_options);
+
+                var httpTransport = new HttpTransport(_options, httpClient);
 
             // Non-caching transport
             if (string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
@@ -74,6 +78,8 @@ namespace Sentry.Internal
 
         public IBackgroundWorker CreateBackgroundWorker()
         {
+            using var _ = Xunxo.Start("CachingTransport", "CreateBackgroundWorker");
+
             if (_options.BackgroundWorker is { } worker)
             {
                 _options.DiagnosticLogger?.LogDebug("Using IBackgroundWorker set through options: {0}.",

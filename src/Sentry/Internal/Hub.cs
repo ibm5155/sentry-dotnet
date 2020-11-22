@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using ContribSentry.Interface;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 using Sentry.Protocol;
@@ -21,6 +22,8 @@ namespace Sentry.Internal
 
         public Hub(SentryOptions options)
         {
+            using var _ = Xunxo.Start("Hub", "Ctor");
+
             Debug.Assert(options != null);
             _options = options;
 

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using ContribSentry.Interface;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
@@ -40,6 +41,7 @@ namespace Sentry.Internal.Http
 
         public CachingTransport(ITransport innerTransport, SentryOptions options)
         {
+            using var a = Xunxo.Start("CachingTransport", ".Ctor");
             _innerTransport = innerTransport;
             _options = options;
 
@@ -95,10 +97,13 @@ namespace Sentry.Internal.Http
                     // Worker has been shut down, it's okay
                 }
             });
+            a.Finish();
         }
 
         private void EnsureFreeSpaceInCache()
         {
+            using var _ = Xunxo.Start("CachingTransport", "EnsureFreeSpaceInCache");
+
             // Trim files, leaving only (X - 1) of the newest ones.
             // X-1 because we need at least 1 empty space for an envelope we're about to add.
             // Example:
@@ -131,6 +136,8 @@ namespace Sentry.Internal.Http
 
         private IEnumerable<string> GetCacheFilePaths()
         {
+            using var _ = Xunxo.Start("CachingTransport", "GetCacheFilePaths");
+
             try
             {
                 return Directory
@@ -149,6 +156,8 @@ namespace Sentry.Internal.Http
 
         private async ValueTask ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
+            using var _ = Xunxo.Start("CachingTransport", "ProcessCacheAsync");
+
             _options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
 
             while (await TryPrepareNextCacheFileAsync(cancellationToken).ConfigureAwait(false) is { } envelopeFilePath)
@@ -183,10 +192,11 @@ namespace Sentry.Internal.Http
                 catch (Exception ex)
                 {
                     // Device without connection (airplane mode, proxy with issues, ....)
-                    if(ex is HttpRequestException && ex.InnerException is SocketException)
-                    {
+                    if (ex is HttpRequestException && ex.InnerException is SocketException)
+                    { 
                         throw;
                     }
+
                     _options.DiagnosticLogger?.LogError(
                         "Failed to send cached envelope: {0}, discarting cached envelope.",
                         ex,
@@ -205,6 +215,8 @@ namespace Sentry.Internal.Http
         private async ValueTask<string?> TryPrepareNextCacheFileAsync(
             CancellationToken cancellationToken = default)
         {
+            using var _ = Xunxo.Start("CachingTransport", "TryPrepareNextCacheFileAsync");
+
             using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
             var filePath = GetCacheFilePaths().FirstOrDefault();
@@ -225,6 +237,7 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            using var _ = Xunxo.Start("CachingTransport", "StoreToCacheAsync");
             using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
             EnsureFreeSpaceInCache();

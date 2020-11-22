@@ -1,6 +1,7 @@
 using System;
 using System.IO.Compression;
 using System.Net.Http;
+using ContribSentry.Interface;
 using Sentry.Extensibility;
 using Sentry.Http;
 
@@ -19,17 +20,21 @@ namespace Sentry.Internal.Http
         /// <returns></returns>
         public HttpClient Create(SentryOptions options)
         {
+            using var a = Xunxo.Start("Ctor", "DefaultSentryHttpClientFactory");
+
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
-
+            using var b = Xunxo.Start("Ctor httpClientHandler", "DefaultSentryHttpClientFactory net2.1");
             var httpClientHandler = options.CreateHttpClientHandler?.Invoke() ?? new HttpClientHandler();
             if (options.HttpProxy != null)
             {
                 httpClientHandler.Proxy = options.HttpProxy;
                 options.DiagnosticLogger?.LogInfo("Using Proxy: {0}", options.HttpProxy);
             }
+            b.Finish();
+
 
             // If the platform supports automatic decompression
             if (httpClientHandler.SupportsAutomaticDecompression)
@@ -62,10 +67,19 @@ namespace Sentry.Internal.Http
                 options.DiagnosticLogger?.LogDebug("Using no request body compression strategy.");
             }
 
+
             // Adding retry after last for it to run first in the pipeline
+            using var c = Xunxo.Start("Ctor", "RetryAfterHandler");
+
             handler = new RetryAfterHandler(handler);
 
+            c.Finish();
+
+            using var d = Xunxo.Start("Ctor", "HttpClient");
+
             var client = new HttpClient(handler);
+
+            d.Finish();
 
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 

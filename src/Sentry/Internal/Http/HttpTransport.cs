@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using ContribSentry.Interface;
 using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -98,7 +99,13 @@ namespace Sentry.Internal.Http
 
             // Send envelope to ingress
             using var request = CreateRequest(processedEnvelope);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            using var a = Xunxo.StartReq(request.RequestUri.ToString(), ContribSentry.Enums.ESpanRequest.Post);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
             using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            a.Finish((int)response.StatusCode);
 
             // Read & set rate limits for future requests
             ExtractRateLimits(response, instant);
