@@ -58,10 +58,11 @@ namespace Sentry.Internal
                 {
                     cachingTransport.FlushAsync(timeout.Token).GetAwaiter().GetResult();
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException oc)
                 {
                     _options.DiagnosticLogger?.LogError(
-                        "Flushing timed out."
+                        "Flushing timed out.",
+                        oc
                     );
                 }
                 catch (Exception ex)

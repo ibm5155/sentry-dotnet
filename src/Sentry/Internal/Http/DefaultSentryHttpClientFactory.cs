@@ -20,13 +20,13 @@ namespace Sentry.Internal.Http
         /// <returns></returns>
         public HttpClient Create(SentryOptions options)
         {
-            using var a = Xunxo.Start("Ctor", "DefaultSentryHttpClientFactory");
+            using var a = Xunxo.Start("DefaultSentryHttpClientFactory", "Ctor");
 
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
-            using var b = Xunxo.Start("Ctor httpClientHandler", "DefaultSentryHttpClientFactory net2.1");
+            var b = a.StartChild("DefaultSentryHttpClientFactory", "Invoke");
             var httpClientHandler = options.CreateHttpClientHandler?.Invoke() ?? new HttpClientHandler();
             if (options.HttpProxy != null)
             {
@@ -69,13 +69,13 @@ namespace Sentry.Internal.Http
 
 
             // Adding retry after last for it to run first in the pipeline
-            using var c = Xunxo.Start("Ctor", "RetryAfterHandler");
+            var c = a.StartChild("RetryAfterHandler", "Ctor");
 
             handler = new RetryAfterHandler(handler);
 
             c.Finish();
 
-            using var d = Xunxo.Start("Ctor", "HttpClient");
+            var d = a.StartChild("HttpClient", "Ctor");
 
             var client = new HttpClient(handler);
 
