@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -13,17 +15,14 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    /// <inheritdoc />
-    public class Scope : BaseScope
+    public class Scope : IScope
     {
-        private volatile bool _hasEvaluated;
-        private readonly object _evaluationSync = new object();
+        internal SentryOptions Options { get; }
+        IScopeOptions IScope.ScopeOptions => Options;
 
         internal bool Locked { get; set; }
-        internal SentryOptions Options { get; }
 
         private readonly object _lastEventIdSync = new object();
-
         private SentryId _lastEventId;
 
         internal SentryId LastEventId
@@ -43,6 +42,9 @@ namespace Sentry
                 }
             }
         }
+
+        private readonly object _evaluationSync = new object();
+        private volatile bool _hasEvaluated;
 
         /// <summary>
         /// Whether the <see cref="OnEvaluating"/> event has already fired.
@@ -78,11 +80,61 @@ namespace Sentry
         /// <see cref="Evaluate"/>
         internal event EventHandler? OnEvaluating;
 
+        /// <inheritdoc />
+        public SentryLevel? Level { get; set; }
+
+        /// <inheritdoc />
+        public string? Transaction { get; set; }
+
+        private Request? _request;
+
+        /// <inheritdoc />
+        public Request Request
+        {
+            get => _request ??= new Request();
+            set => _request = value;
+        }
+
+        private Contexts? _contexts;
+
+        /// <inheritdoc />
+        public Contexts Contexts
+        {
+            get => _contexts ??= new Contexts();
+            set => _contexts = value;
+        }
+
+        private User? _user;
+
+        /// <inheritdoc />
+        public User User
+        {
+            get => _user ??= new User();
+            set => _user = value;
+        }
+
+        /// <inheritdoc />
+        public string? Environment { get; set; }
+
+        /// <inheritdoc />
+        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+
+        /// <inheritdoc />
+        public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
+
+        /// <inheritdoc />
+        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new ConcurrentQueue<Breadcrumb>();
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object?> Extra { get; } = new ConcurrentDictionary<string, object?>();
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
+
         /// <summary>
         /// Creates a scope with the specified options.
         /// </summary>
         public Scope(SentryOptions? options)
-            : base(options)
         {
             Options = options ?? new SentryOptions();
         }

@@ -22,6 +22,8 @@ namespace Sentry
     public class SentryOptions : IScopeOptions
     {
         private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
+        private Dictionary<string, string>? _defaultTags;
+
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal string ClientVersion { get; } = SdkName;
@@ -58,6 +60,9 @@ namespace Sentry
         internal IBackgroundWorker? BackgroundWorker { get; set; }
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
+
+        /// <inheritdoc />
+        public ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; } = new DefaultSentryScopeStateProcessor();
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered not part of application code
@@ -361,6 +366,32 @@ namespace Sentry
         /// By default will not drop an event solely for including an inner exception that was already captured.
         /// </remarks>
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
+
+        /// <summary>
+        /// Path to the root directory used for storing events locally for resilience.
+        /// If set to <code>null</code>, caching will not be used.
+        /// </summary>
+        public string? CacheDirectoryPath { get; set; }
+
+        /// <summary>
+        /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
+        /// You can set it to <code>TimeSpan.Zero</code> to disable this feature.
+        /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
+        /// </summary>
+        /// <remarks>
+        /// The trade off here is: Ensure a crash that happens during app start is sent to Sentry
+        /// even though that might slow down the app start. If set to false, the app might crash
+        /// too quickly, before Sentry can capture the cached error in the background.
+        /// </remarks>
+        public TimeSpan InitCacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
+
+        /// <summary>
+        /// Defaults tags to add to all events. (These are indexed by Sentry).
+        /// </summary>
+        /// <remarks>
+        /// If the key already exists in the event, it will not be overwritten by a default tag.
+        /// </remarks>
+        public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>

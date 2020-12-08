@@ -8,7 +8,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Represents an object which is already serialized as a stream.
     /// </summary>
-    internal class StreamSerializable : ISerializable, IDisposable
+    internal sealed class StreamSerializable : ISerializable, IDisposable
     {
         /// <summary>
         /// Source stream.
@@ -21,7 +21,7 @@ namespace Sentry.Protocol.Envelopes
         public StreamSerializable(Stream source) => Source = source;
 
         /// <inheritdoc />
-        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
             await Source.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
 
         /// <inheritdoc />

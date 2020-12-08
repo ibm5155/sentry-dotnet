@@ -2,7 +2,6 @@ using System;
 using log4net;
 using log4net.Core;
 using NSubstitute;
-using Sentry.Protocol;
 using Sentry.Reflection;
 using Xunit;
 
@@ -145,8 +144,7 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _ = _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.InternalUser == null));
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => !e.HasUser()));
         }
 
         [Fact]

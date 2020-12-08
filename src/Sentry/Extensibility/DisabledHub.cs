@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
@@ -33,7 +32,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope) => default;
+        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;
 
         /// <summary>
         /// No-Op.
@@ -67,7 +66,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public ValueTask FlushAsync(TimeSpan timeout) => default;
+        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
 
         /// <summary>
         /// No-Op.

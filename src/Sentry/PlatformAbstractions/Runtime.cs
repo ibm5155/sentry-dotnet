@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.PlatformAbstractions
 {
     /// <summary>
@@ -109,7 +107,7 @@ namespace Sentry.PlatformAbstractions
         /// </summary>
         /// <param name="obj">The instance to compare against.</param>
         /// <returns>True if the instances are equal by reference or its state.</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;

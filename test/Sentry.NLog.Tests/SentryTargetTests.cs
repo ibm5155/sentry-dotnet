@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using NLog.Common;
@@ -396,7 +397,7 @@ namespace Sentry.NLog.Tests
 
             sut.Error("message {SourceContext}", "Sentry.NLog");
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
         }
 
         [Fact]
@@ -406,7 +407,7 @@ namespace Sentry.NLog.Tests
 
             sut.Error("message {SourceContext}", "Sentry");
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
         }
 
         [Fact]
@@ -471,17 +472,19 @@ namespace Sentry.NLog.Tests
 
             var testDisposable = Substitute.For<IDisposable>();
 
+            var evt = new ManualResetEventSlim();
             AsyncContinuation continuation = e =>
             {
                 testDisposable.Dispose();
+                evt.Set();
             };
 
             factory.Flush(continuation, timeout);
 
-            await Task.Delay(timeout);
+            Assert.True(evt.Wait(timeout));
 
             testDisposable.Received().Dispose();
-            hub.Received().FlushAsync(Arg.Any<TimeSpan>()).GetAwaiter().GetResult();
+            await hub.Received().FlushAsync(Arg.Any<TimeSpan>());
         }
 
         [Fact]

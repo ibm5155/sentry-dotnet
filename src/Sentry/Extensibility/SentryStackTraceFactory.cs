@@ -91,6 +91,11 @@ namespace Sentry.Extensibility
             var firstFrame = true;
             foreach (var stackFrame in frames)
             {
+                if (stackFrame is null)
+                {
+                    continue;
+                }
+
                 // Remove the frames until the call for capture with the SDK
                 if (firstFrame
                     && isCurrentStackTrace
@@ -163,7 +168,8 @@ namespace Sentry.Extensibility
         /// Get a <see cref="MethodBase"/> from <see cref="StackFrame"/>.
         /// </summary>
         /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
-        protected virtual MethodBase GetMethod(StackFrame stackFrame) => stackFrame.GetMethod();
+        protected virtual MethodBase? GetMethod(StackFrame stackFrame)
+            => stackFrame.GetMethod();
 
         private bool IsSystemModuleName(string? moduleName)
         {
